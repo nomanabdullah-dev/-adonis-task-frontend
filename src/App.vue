@@ -5,7 +5,9 @@
     </header>
 
     <div class="bg-gray-200 h-full md:h-screen pt-20">
-      <router-view/>
+      <vue-page-transition name="fade-in-right">
+        <router-view/>
+      </vue-page-transition>
     </div>
   </div>
 </template>

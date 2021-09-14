@@ -7,10 +7,10 @@
           <p class="text-gray-700 text-left text-lg py-8">View All Tasks</p>
           <div class="h-72 overflow-y-scroll w-full md:w-11/12" v-if="GetTasks.data.length">
             <div v-for="task in GetTasks.data" :key="task.id">
-              <div class="my-4 bg-white shadow rounded-md border-t-4 border-red-400 w-11/12">
+              <div class="my-4 bg-white shadow rounded-md border-t-4 w-11/12" :class="task.completed ? 'border-green-400':'border-red-400'">
                 <div class="border-b-2 border-gray-300 p-2 items-center w-full flex justify-between">
                   <p class="ml-2 text-gray-700">{{ task.title }}</p>
-                  <i class="fa fa-trash-o cursor-pointer text-red-400 fill-current hover:text-red-600" @click="deleteTask(task)"></i>
+                  <i class="fa fa-trash-o cursor-pointer fill-current hover:text-red-600" @click="deleteTask(task)"  :class="task.completed ? 'text-green-400':'text-red-400'"></i>
                 </div>
                 <div class="py-4 px-3 flex justify-start items-center">
                   <input type="checkbox" class="p-2 ml-2" v-model="task.completed" @change="updateTask(task)">
@@ -28,8 +28,8 @@
         <div class="w-full md:w-1/2 mt-20">
           <form @submit.prevent="createTask" class="bg-white rounded px-8 py-4 shadow hover:shadow-md">
             <p class="text-left font-semibold text-gray-700 text-xl">Create New Task</p>
-            <div class="bg-red-200 shadow rounded w-64 mx-auto p-3 text-red-500 mt-3">
-              <p class="text-center">Errors here</p>
+            <div class="bg-red-200 shadow rounded w-64 mx-auto p-3 text-red-500 mt-3" v-show="error">
+              <p class="text-center">{{ error }}</p>
             </div>
             <div class="mt-12">
               <input type="text" v-model="form.title" class="shadow border rounded w-full py-3 px-3 text-gray-700 focus:outline-none" placeholder="Enter Title">
@@ -55,15 +55,27 @@ export default {
       form: {
         title: '',
         task: ''
-      }
+      },
+      error: null
     }
   },
   computed: {
     ...mapGetters('tasks', ["GetTasks"])
   },
   methods: {
-    ...mapActions('tasks', ["FetchTasks", "MarkTaskProgress", "DeleteTask"]),
-    createTask(){},
+    ...mapActions('tasks', ["FetchTasks", "MarkTaskProgress", "DeleteTask", "CreateTask"]),
+    createTask(){
+      if(this.form.title && this.form.task) {
+        const payload = {
+          title: this.form.title,
+          task: this.form.task
+        }
+        this.CreateTask(payload)
+        this.clearForm()
+      } else {
+        this.error = 'Please fill all the required fields'
+      }
+    },
     updateTask(task) {
       const payload = {
         id: task.id,
@@ -75,6 +87,18 @@ export default {
     },
     deleteTask(task) {
       this.DeleteTask(task)
+    },
+    clearForm() {
+      this.form.title = '',
+      this.form.task = ''
+    }
+  },
+  watch: {
+    error: {
+      handler: function () {
+        let as = this
+        setTimeout(function() { as.error = null}, 3000)
+      }
     }
   },
   created() {

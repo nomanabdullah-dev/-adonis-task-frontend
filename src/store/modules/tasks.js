@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const state = ()=> {
     return {
-        tasks: ''
+        tasks: null
     }
 }
 
@@ -41,6 +41,14 @@ const actions = {
     async DeleteTask(context, payload) {
         try {
             await axios.delete(`${process.env.VUE_APP_API_ENDPOINT}tasks/${payload.id}`)
+            context.dispatch('FetchTasks')
+        } catch (error) {
+            console.log(error.response)
+        }
+    },
+    async CreateTask(context, payload) {
+        try {
+            await axios.post(`${process.env.VUE_APP_API_ENDPOINT}tasks`, payload)
             context.dispatch('FetchTasks')
         } catch (error) {
             console.log(error.response)
